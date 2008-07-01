@@ -5,7 +5,6 @@ require 'spec/rake/spectask'
 require 'rake/packagetask'
 require 'rake/gempackagetask'
 require 'rake/rdoctask'
-require 'rake/contrib/rubyforgepublisher'
 require 'rake/contrib/sshpublisher'
 require 'fileutils'
 include FileUtils
@@ -14,8 +13,6 @@ NAME              = "www-favicon"
 AUTHOR            = "youpy"
 EMAIL             = "youpy@buycheapviagraonlinenow.com"
 DESCRIPTION       = "find favicon url"
-RUBYFORGE_PROJECT = "wwwfavicon"
-HOMEPATH          = "http://#{RUBYFORGE_PROJECT}.rubyforge.org"
 BIN_FILES         = %w(  )
 VERS              = "0.0.1"
 
@@ -50,9 +47,7 @@ spec = Gem::Specification.new do |s|
 	s.description       = DESCRIPTION
 	s.author            = AUTHOR
 	s.email             = EMAIL
-	s.homepage          = HOMEPATH
 	s.executables       = BIN_FILES
-	s.rubyforge_project = RUBYFORGE_PROJECT
 	s.bindir            = "bin"
 	s.require_path      = "lib"
 	s.autorequire       = ""
@@ -98,36 +93,6 @@ Rake::RDocTask.new do |rdoc|
 		rdoc.rdoc_files.include('lib/**/*.rb')
 		rdoc.rdoc_files.include('ext/**/*.c')
 	end
-end
-
-desc "Publish to RubyForge"
-task :rubyforge => [:rdoc, :package] do
-	require 'rubyforge'
-	Rake::RubyForgePublisher.new(RUBYFORGE_PROJECT, 'youpy').upload
-end
-
-desc 'Package and upload the release to rubyforge.'
-task :release => [:clean, :package] do |t|
-	v = ENV["VERSION"] or abort "Must supply VERSION=x.y.z"
-	abort "Versions don't match #{v} vs #{VERS}" unless v == VERS
-	pkg = "pkg/#{NAME}-#{VERS}"
-
-	rf = RubyForge.new
-	puts "Logging in"
-	rf.login
-
-	c = rf.userconfig
-#	c["release_notes"] = description if description
-#	c["release_changes"] = changes if changes
-	c["preformatted"] = true
-
-	files = [
-		"#{pkg}.tgz",
-		"#{pkg}.gem"
-	].compact
-
-	puts "Releasing #{NAME} v. #{VERS}"
-	rf.add_release RUBYFORGE_PROJECT, NAME, VERS, *files
 end
 
 desc 'Show information about the gem.'

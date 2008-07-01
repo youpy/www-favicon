@@ -11,10 +11,8 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = ["README", "ChangeLog"]
   s.files = ["README", "ChangeLog", "Rakefile", "lib/www", "lib/www/favicon.rb"]
   s.has_rdoc = true
-  s.homepage = %q{http://wwwfavicon.rubyforge.org}
   s.rdoc_options = ["--title", "www-favicon documentation", "--charset", "utf-8", "--opname", "index.html", "--line-numbers", "--main", "README", "--inline-source", "--exclude", "^(examples|extras)/"]
   s.require_paths = ["lib"]
-  s.rubyforge_project = %q{wwwfavicon}
   s.rubygems_version = %q{1.2.0}
   s.summary = %q{find favicon url}
 
