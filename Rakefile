@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'rake'
 require 'rake/clean'
-require 'rake/testtask'
+require 'spec/rake/spectask'
 require 'rake/packagetask'
 require 'rake/gempackagetask'
 require 'rake/rdoctask'
@@ -13,7 +13,7 @@ include FileUtils
 NAME              = "www-favicon"
 AUTHOR            = "youpy"
 EMAIL             = "youpy@buycheapviagraonlinenow.com"
-DESCRIPTION       = "detect favicon url"
+DESCRIPTION       = "find favicon url"
 RUBYFORGE_PROJECT = "wwwfavicon"
 HOMEPATH          = "http://#{RUBYFORGE_PROJECT}.rubyforge.org"
 BIN_FILES         = %w(  )
@@ -30,13 +30,13 @@ RDOC_OPTS = [
 	"--inline-source",
 ]
 
-task :default => [:test]
+task :default => [:spec]
 task :package => [:clean]
 
-Rake::TestTask.new("test") do |t|
-	t.libs   << "test"
-	t.pattern = "test/**/*_test.rb"
-	t.verbose = true
+Spec::Rake::SpecTask.new do |t|
+  t.spec_opts = ['--options', "spec/spec.opts"]
+  t.spec_files = FileList['spec/*_spec.rb']
+  t.rcov = true
 end
 
 spec = Gem::Specification.new do |s|
@@ -128,4 +128,9 @@ task :release => [:clean, :package] do |t|
 
 	puts "Releasing #{NAME} v. #{VERS}"
 	rf.add_release RUBYFORGE_PROJECT, NAME, VERS, *files
+end
+
+desc 'Show information about the gem.'
+task :debug_gem do
+  puts spec.to_ruby
 end
