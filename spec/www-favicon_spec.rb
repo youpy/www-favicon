@@ -7,31 +7,26 @@ require 'www/favicon'
 describe WWW::Favicon do
   before do
     @favicon = WWW::Favicon.new
+    @htmls = [
+              '<html><link rel="icon" href="/foo/favicon.ico" /></html>',
+              '<html><link rel="Shortcut Icon" href="/foo/favicon.ico" /></html>',
+              '<html><link rel="shortcut icon" href="/foo/favicon.ico" /></html>',
+              '<html><link rel="shortcut icon" href="./foo/favicon.ico" /></html>',
+              '<html><link rel="shortcut icon" href="http://example.com/foo/favicon.ico" /></html>',
+             ]
   end
 
-  it "should find from link element when rel is short" do
-    @favicon.stub!(:request).and_return expect(:body => '<html><link rel="icon" href="/favicon_shortrel.ico" /></html>')
-    @favicon.find('http://example.com/').should == 'http://example.com/favicon_shortrel.ico'
+  it "should find from url" do
+    @htmls.each do |html|
+      @favicon.stub!(:request).and_return expect(:body => html)
+      @favicon.find('http://example.com/').should == 'http://example.com/foo/favicon.ico'
+    end
   end
   
-  it "should find from link element when rel is upcase" do
-    @favicon.stub!(:request).and_return expect(:body => '<html><link rel="Shortcut Icon" href="/favicon_shortrel.ico" /></html>')
-    @favicon.find('http://example.com/').should == 'http://example.com/favicon_shortrel.ico'
-  end
-  
-  it "should find absolute url from link element" do
-    @favicon.stub!(:request).and_return expect(:body => '<html><link rel="shortcut icon" href="/favicon.ico" /></html>')
-    @favicon.find('http://example.com/repos/').should == 'http://example.com/favicon.ico'
-  end
-  
-  it "should find relative url from link element" do
-    @favicon.stub!(:request).and_return expect(:body => '<html><link rel="shortcut icon" href="./chrome/common/trac.ico" /></html>')
-    @favicon.find('http://example.com/repos/').should == 'http://example.com/repos/chrome/common/trac.ico'
-  end
-  
-  it "should find from link element when href starts with http" do
-    @favicon.stub!(:request).and_return expect(:body => '<html><link rel="shortcut icon" href="http://example.com/foo/favicon.ico" /></html>')
-    @favicon.find('http://example.com/').should == 'http://example.com/foo/favicon.ico'
+  it "should find from html and url" do
+    @htmls.each do |html|
+      @favicon.find_from_html(html, 'http://example.com/').should == 'http://example.com/foo/favicon.ico'
+    end
   end
   
   it "should find from default path" do

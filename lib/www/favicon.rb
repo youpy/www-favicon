@@ -5,15 +5,23 @@ require 'hpricot'
 
 module WWW
   class Favicon
+    VERSION = '0.0.2'
+
     def find(url)
       uri = URI(url)
-      find_from_link(uri) || try_default_path(uri)
+      html = request(uri).body
+
+      find_from_html(html, uri)
+    end
+    
+    def find_from_html(html, uri)
+      find_from_link(html, uri) || try_default_path(uri)
     end
 
     private 
 
-    def find_from_link(uri)
-      doc = Hpricot(request(uri).body)
+    def find_from_link(html, uri)
+      doc = Hpricot(html)
     
       doc.search('//link').each do |link|
         if link[:rel] =~ /^(shortcut )?icon$/i

@@ -7,6 +7,10 @@ require 'rake/gempackagetask'
 require 'rake/rdoctask'
 require 'rake/contrib/sshpublisher'
 require 'fileutils'
+
+$LOAD_PATH << File.dirname(__FILE__) + '/lib/'
+require 'www/favicon'
+
 include FileUtils
 
 NAME              = "www-favicon"
@@ -14,7 +18,7 @@ AUTHOR            = "youpy"
 EMAIL             = "youpy@buycheapviagraonlinenow.com"
 DESCRIPTION       = "find favicon url"
 BIN_FILES         = %w(  )
-VERS              = "0.0.1"
+VERS              = WWW::Favicon::VERSION
 
 REV = File.read(".svn/entries")[/committed-rev="(d+)"/, 1] rescue nil
 CLEAN.include ['**/.*.sw?', '*.gem', '.config']
