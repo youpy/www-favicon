@@ -5,16 +5,15 @@ require 'hpricot'
 
 module WWW
   class Favicon
-    VERSION = '0.0.2'
+    VERSION = '0.0.3'
 
     def find(url)
-      uri = URI(url)
-      html = request(uri).body
-
-      find_from_html(html, uri)
+      html = request(URI(url)).body
+      find_from_html(html, url)
     end
     
-    def find_from_html(html, uri)
+    def find_from_html(html, url)
+      uri = URI(url)
       find_from_link(html, uri) || try_default_path(uri)
     end
 

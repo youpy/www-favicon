@@ -32,11 +32,17 @@ describe WWW::Favicon do
   it "should find from default path" do
     @favicon.stub!(:request).and_return(expect(:body => '<html></html>'), expect(:code => '200'))
     @favicon.find('http://www.example.com/').should == 'http://www.example.com/favicon.ico'
+
+    @favicon.stub!(:request).and_return(expect(:code => '200'))
+    @favicon.find_from_html('<html></html>', 'http://www.example.com/').should == 'http://www.example.com/favicon.ico'
   end
   
   it "should not find from default path" do
     @favicon.stub!(:request).and_return(expect(:body => '<html></html>'), expect(:code => '404'))
     @favicon.find('http://example.com/').should be_nil
+
+    @favicon.stub!(:request).and_return(expect(:code => '404'))
+    @favicon.find_from_html('<html></html>', 'http://www.example.com/').should be_nil
   end
 end
 
