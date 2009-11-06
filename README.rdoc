@@ -2,29 +2,31 @@
 = www-favicon
 
 == Description
+
 library for finding favicon from specific URL
 
 == Installation
 
 === Archive Installation
 
-    rake install
+ rake install
 
 === Gem Installation
 
-    gem install www-favicon
-
+ gem update --system
+ gem install gemcutter
+ gem tumble
+ gem install www-favicon
 
 == Features/Problems
 
-
 == Synopsis
    
-   require 'rubygems'
-   require 'www-favicon'
+ require 'rubygems'
+ require 'www-favicon'
 
-   favicon = WWW::Favicon.new
-   favicon_url = favicon.find('http://www.google.com/')
+ favicon = WWW::Favicon.new
+ favicon_url = favicon.find('http://www.google.com/')
 
 == Copyright
 
