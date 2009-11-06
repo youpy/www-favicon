@@ -7,25 +7,43 @@ module WWW
   class Favicon
     VERSION = '0.0.3'
 
+    def initialize(options = {})
+      @options = options
+    end
+
     def find(url)
       html = request(URI(url)).body
       find_from_html(html, url)
     end
-    
+
     def find_from_html(html, url)
       uri = URI(url)
-      find_from_link(html, uri) || try_default_path(uri)
+      favicon_url = find_from_link(html, uri) || try_default_path(uri)
+      if @options[:verify]
+        favicon_url = nil unless valid_favicon_url?(favicon_url)
+      end
+      favicon_url
     end
 
-    private 
+    def valid_favicon_url?(url)
+      response = request(URI.parse(url))
+
+      (
+        response.code =~ /\A2/ &&
+        response.body.to_s != '' &&
+        response.content_type =~ /image/i
+      ) ? true : false
+    end
+
+    private
 
     def find_from_link(html, uri)
       doc = Hpricot(html)
-    
+
       doc.search('//link').each do |link|
         if link[:rel] =~ /^(shortcut )?icon$/i
           favicon_url_or_path = link[:href]
-          
+
           if favicon_url_or_path =~ /^http/
             return favicon_url_or_path
           else
@@ -33,7 +51,7 @@ module WWW
           end
         end
       end
-      
+
       nil
     end
 
@@ -51,21 +69,21 @@ module WWW
       when '3'
         return response['Location']
       end
-      
+
       nil
     end
-    
+
     def request(uri, method = 'get')
       http = Net::HTTP.new(uri.host, uri.port)
-      
+
       if uri.scheme == 'https'
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
       http.start do |http|
-        path = 
-          (uri.path.empty? ? '/' : uri.path) +  
+        path =
+          (uri.path.empty? ? '/' : uri.path) +
           (uri.query       ? '?' + uri.query : '') +
           (uri.fragment    ? '#' + uri.fragment : '')
         response = http.send(method, path)
