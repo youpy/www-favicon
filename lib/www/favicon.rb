@@ -7,37 +7,38 @@ module WWW
   class Favicon
     VERSION = '0.0.4'
 
-    def initialize(options = {})
-      @options = options
-    end
-
     def find(url)
-      html = request(URI(url)).body
+      html = request(url).body
       find_from_html(html, url)
     end
 
     def find_from_html(html, url)
-      uri = URI(url)
-      favicon_url = find_from_link(html, uri) || try_default_path(uri)
-      if @options[:verify]
-        favicon_url = nil unless valid_favicon_url?(favicon_url)
-      end
+      favicon_url = find_from_link(html, url) || default_path(url)
+
+      return nil unless valid_favicon_url?(favicon_url)
+
       favicon_url
     end
 
-    def valid_favicon_url?(url)
-      response = request(URI.parse(url))
+    def valid_favicon_url?(url, limit = 10)
+      return false if limit == 0
 
-      (
-        response.code =~ /\A2/ &&
-        response.body.to_s != '' &&
-        response.content_type =~ /image/i
-      ) ? true : false
+      response = request(url)
+
+      if response.kind_of?(Net::HTTPRedirection)
+        valid_favicon_url?(response['Location'], limit - 1)
+      else
+        (
+          response.code =~ /\A2/ &&
+          response.body.to_s != '' &&
+          response.content_type =~ /image/i
+          ) ? true : false
+      end
     end
 
     private
 
-    def find_from_link(html, uri)
+    def find_from_link(html, url)
       doc = Hpricot(html)
 
       doc.search('//link').each do |link|
@@ -47,7 +48,7 @@ module WWW
           if favicon_url_or_path =~ /^http/
             return favicon_url_or_path
           else
-            return URI.join(uri.to_s, favicon_url_or_path).to_s
+            return URI.join(url, favicon_url_or_path).to_s
           end
         end
       end
@@ -55,25 +56,18 @@ module WWW
       nil
     end
 
-    def try_default_path(uri)
+    def default_path(url)
+      uri = URI(url)
       uri.path = '/favicon.ico'
       %w[query fragment].each do |element|
         uri.send element + '=', nil
       end
 
-      response = request(uri, 'head')
-
-      case response.code.split('').first
-      when '2'
-        return uri.to_s
-      when '3'
-        return response['Location']
-      end
-
-      nil
+      uri.to_s
     end
 
-    def request(uri, method = 'get')
+    def request(url, method = 'get')
+      uri = URI(url)
       http = Net::HTTP.new(uri.host, uri.port)
 
       if uri.scheme == 'https'
