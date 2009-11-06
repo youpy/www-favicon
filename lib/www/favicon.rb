@@ -5,7 +5,7 @@ require 'hpricot'
 
 module WWW
   class Favicon
-    VERSION = '0.0.4'
+    VERSION = '0.0.5'
 
     def find(url)
       html = request(url).body
