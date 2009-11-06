@@ -18,7 +18,7 @@ describe WWW::Favicon do
 
   it "should find from url" do
     @htmls.each do |html|
-      @favicon.stub!(:request).and_return expect(:body => html)
+      @favicon.stub!(:request).and_return expectaction(:body => html)
       @favicon.find('http://example.com/').should == 'http://example.com/foo/favicon.ico'
     end
   end
@@ -30,22 +30,22 @@ describe WWW::Favicon do
   end
   
   it "should find from default path" do
-    @favicon.stub!(:request).and_return(expect(:body => '<html></html>'), expect(:code => '200'))
+    @favicon.stub!(:request).and_return(expectaction(:body => '<html></html>'), expectaction(:code => '200'))
     @favicon.find('http://www.example.com/').should == 'http://www.example.com/favicon.ico'
 
-    @favicon.stub!(:request).and_return(expect(:code => '200'))
+    @favicon.stub!(:request).and_return(expectaction(:code => '200'))
     @favicon.find_from_html('<html></html>', 'http://www.example.com/').should == 'http://www.example.com/favicon.ico'
   end
   
   it "should not find from default path" do
-    @favicon.stub!(:request).and_return(expect(:body => '<html></html>'), expect(:code => '404'))
+    @favicon.stub!(:request).and_return(expectaction(:body => '<html></html>'), expectaction(:code => '404'))
     @favicon.find('http://example.com/').should be_nil
 
-    @favicon.stub!(:request).and_return(expect(:code => '404'))
+    @favicon.stub!(:request).and_return(expectaction(:code => '404'))
     @favicon.find_from_html('<html></html>', 'http://www.example.com/').should be_nil
   end
 end
 
-def expect(attr)
+def expectaction(attr)
   OpenStruct.new(attr)
 end
