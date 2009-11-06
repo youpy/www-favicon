@@ -5,7 +5,7 @@ require 'hpricot'
 
 module WWW
   class Favicon
-    VERSION = '0.0.3'
+    VERSION = '0.0.4'
 
     def initialize(options = {})
       @options = options
