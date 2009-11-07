@@ -84,7 +84,7 @@ describe WWW::Favicon do
     it 'should follow redirect' do
       @favicon.stub!(:request).and_return(@response)
       @response.should_receive(:kind_of?).and_return(true)
-      @response.should_receive(:'[]').with('Location').and_return('http://example.com/')
+      @response.should_receive(:'[]').with('Location').and_return('http://example.com/foo/favicon.ico')
       @response.should_receive(:kind_of?).and_return(false)
 
       @favicon.valid_favicon_url?(@url).should == true
@@ -95,7 +95,7 @@ describe WWW::Favicon do
 
       10.times do |i|
         @response.should_receive(:kind_of?).and_return(true)
-        @response.should_receive(:'[]').with('Location').and_return("http://example.com/#{i}")
+        @response.should_receive(:'[]').with('Location').and_return("http://example.com/#{i}/favicon.ico")
       end
 
       @favicon.valid_favicon_url?(@url).should == false
