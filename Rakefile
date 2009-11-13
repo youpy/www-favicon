@@ -103,3 +103,15 @@ desc 'Show information about the gem.'
 task :debug_gem do
   puts spec.to_ruby
 end
+
+desc 'Test against the provided URL'
+task :try do
+  url = ENV['URL']
+  raise "URL is required." unless url
+
+  require 'rubygems'
+  require 'www/favicon'
+
+  favicon_url = WWW::Favicon.new.find(url)
+  puts "Favicon URL for #{url} is #{favicon_url.inspect}"
+end
