@@ -8,8 +8,8 @@ module WWW
     VERSION = '0.0.5'
 
     def find(url)
-      html = request(url).body
-      find_from_html(html, url)
+      response = request(url)
+      find_from_html(response.body, response.request_url)
     end
 
     def find_from_html(html, url)
@@ -20,20 +20,14 @@ module WWW
       favicon_url
     end
 
-    def valid_favicon_url?(url, limit = 10)
-      return false if limit == 0
-
+    def valid_favicon_url?(url)
       response = request(url)
 
-      if response.kind_of?(Net::HTTPRedirection)
-        valid_favicon_url?(response['Location'], limit - 1)
-      else
-        (
-          response.code =~ /\A2/ &&
-          response.body.to_s != '' &&
-          response.content_type =~ /image/i
-          ) ? true : false
-      end
+      (
+        response.code =~ /\A2/ &&
+        response.body.to_s != '' &&
+        response.content_type =~ /image/i
+      ) ? true : false
     end
 
     private
@@ -66,7 +60,10 @@ module WWW
       uri.to_s
     end
 
-    def request(url, method = 'get')
+    def request(url, options = {})
+      method = options[:method] || :get
+      redirection_limit = options[:redirection_limit] || 10
+
       uri = URI(url)
       http = Net::HTTP.new(uri.host, uri.port)
 
@@ -75,12 +72,20 @@ module WWW
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
-      http.start do |http|
+      response = http.start do |http|
         path =
           (uri.path.empty? ? '/' : uri.path) +
           (uri.query       ? '?' + uri.query : '') +
           (uri.fragment    ? '#' + uri.fragment : '')
-        response = http.send(method, path)
+        http.send(method, path)
+      end
+
+      if response.kind_of?(Net::HTTPRedirection) && redirection_limit > 0
+        request(response['Location'], :redirection_limit => redirection_limit - 1)
+      else
+        response.instance_variable_set('@request_url', url)
+        def response.request_url; @request_url; end
+        response
       end
     end
   end
